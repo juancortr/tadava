@@ -1,3 +1,4 @@
+'''
 curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -d'
 {
     "settings" : {
@@ -6,8 +7,8 @@ curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -
             "number_of_replicas" : 1
         }
     }
-}
-'
+}'
+'''
 
 
 curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -d'
@@ -71,6 +72,6 @@ curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -
   }
  }
 }
-
+'
 
 curl -XDELETE 'localhost:9200/predial?pretty'
