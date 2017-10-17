@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var client = require('../connection.js'); 
+var client = require('../connection.js');
 var fs = require('fs');
 
 /* GET home page. */
@@ -35,7 +35,7 @@ router.get('/predial', function(req, res, next) {
           }
         }
       }
-      var acc='';      
+      var acc='';
       for (var rep in reponse){
         var pred = reponse[rep]['_source'];
         for (llave in encab){
@@ -51,17 +51,19 @@ router.get('/predial', function(req, res, next) {
         acc+='\n';
         //console.log(acc);
       }
-      
+
       var encabz = encab.join();
       //encab = encab.slice(0, -1);
-      
+
       acc = acc.slice(0, -2);
 
       var content = encabz + '\n' + acc;
-      fs.writeFileSync('public/data.csv', content);
+      // fs.writeFileSync('public/data.csv', content);
       //res.send(acc);
-            
-      res.sendFile("index.html", {"root":"public"});
+
+      // send the data as csv
+      res.set('Content-Type', 'application/octet-stream');
+      res.send(content);
   }, function (err) {
       console.trace(err.message);
   });
@@ -74,7 +76,7 @@ router.get('/predialsampler', function(req, res, next) {
   client.search({
     index: 'predial',
     body: {
-      size:500,
+      size:5000,
       query: {
       },
       aggs:{
@@ -104,7 +106,7 @@ router.get('/predialsampler', function(req, res, next) {
           }
         }
       }
-      var acc='';      
+      var acc='';
       for (var rep in reponse){
         var pred = reponse[rep]['_source'];
         for (llave in encab){
@@ -119,23 +121,29 @@ router.get('/predialsampler', function(req, res, next) {
         acc+='\n';
         //console.log(acc);
       }
-      
+
       var encabz = encab.join();
       //encab = encab.slice(0, -1);
-      
+
       acc = acc.slice(0, -2);
 
       var content = encabz + '\n' + acc;
-      fs.writeFileSync('public/data.csv', content);
+
+      // send the data as csv
+      res.set('Content-Type', 'application/octet-stream');
+      res.send(content);
       //res.send(acc);
-            
-      res.sendFile("index.html", {"root":"public"});
+
+      // res.sendFile("index.html", {"root":"public"});
   }, function (err) {
       console.trace(err.message);
   });
   //res.render('index', { title: 'Express' });
 });
 
+router.get('/', function(req, res, next) {
+  res.sendFile("index.html", {"root":"public"});
+});
 
 
 module.exports = router;

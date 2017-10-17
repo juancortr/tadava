@@ -33,45 +33,45 @@
     "FUENTE_DIR"
   ];
   var seqColumns = [
-    "FECHA_LIMITE_1",
-    "FECHA_LIMITE_2",
-    "FECHA_LIMITE_3",
-    //"FECHA_ESTADO",
-    "FECHA_REG",
-    "AJUSTE_TARIFA",
-    "AREA_TERRENO",
-    "TARIFA_PLENA",
-    "IMPUESTO_CARGO",
-    "AUTOAVALUO",
-    "AREA_CONSTRUIDA",
-    "PORCENTAJE_EXENCION",
-    "AJUSTE_EQUIDAD_3",
-    "AJUSTE_EQUIDAD_2",
-    "AJUSTE_EQUIDAD_1",
-    "SALDO_CARGO_1",
-    "SALDO_CARGO_2",
-    "SALDO_CARGO_3",
-    "IMPUESTO_AJUSTADO_3",
-    "IMPUESTO_AJUSTADO_2",
-    "IMPUESTO_AJUSTADO_1",
-    "TOTAL_PAGAR_3",
-    "TOTAL_PAGAR_2",
-    "TOTAL_PAGAR_1",
-    "VALOR_DESCUENTO_3",
-    "VALOR_DESCUENTO_2",
-    "VALOR_DESCUENTO_1",
-    "VALOR_SANCION_2",
-    "VALOR_SANCION_1",
-    "VALOR_SANCION_3",
-    "VALOR_TOTAL_CON_PAGO_VOL_3",
-    "VALOR_TOTAL_CON_PAGO_VOL_2",
-    "VALOR_TOTAL_CON_PAGO_VOL_1",
-    "VALOR_PAGO_VOLUNTARIO_3",
-    "VALOR_PAGO_VOLUNTARIO_2",
-    "VALOR_PAGO_VOLUNTARIO_1",
-    "VALOR_PAGAR_1",
-    "VALOR_PAGAR_2",
-    "VALOR_PAGAR_3"
+    // "FECHA_LIMITE_1",
+    // "FECHA_LIMITE_2",
+    // "FECHA_LIMITE_3",
+    // //"FECHA_ESTADO",
+    // "FECHA_REG",
+    // "AJUSTE_TARIFA",
+    // "AREA_TERRENO",
+    // "TARIFA_PLENA",
+    // "IMPUESTO_CARGO",
+    // "AUTOAVALUO",
+    // "AREA_CONSTRUIDA",
+    // "PORCENTAJE_EXENCION",
+    // "AJUSTE_EQUIDAD_3",
+    // "AJUSTE_EQUIDAD_2",
+    // "AJUSTE_EQUIDAD_1",
+    // "SALDO_CARGO_1",
+    // "SALDO_CARGO_2",
+    // "SALDO_CARGO_3",
+    // "IMPUESTO_AJUSTADO_3",
+    // "IMPUESTO_AJUSTADO_2",
+    // "IMPUESTO_AJUSTADO_1",
+    // "TOTAL_PAGAR_3",
+    // "TOTAL_PAGAR_2",
+    // "TOTAL_PAGAR_1",
+    // "VALOR_DESCUENTO_3",
+    // "VALOR_DESCUENTO_2",
+    // "VALOR_DESCUENTO_1",
+    // "VALOR_SANCION_2",
+    // "VALOR_SANCION_1",
+    // "VALOR_SANCION_3",
+    // "VALOR_TOTAL_CON_PAGO_VOL_3",
+    // "VALOR_TOTAL_CON_PAGO_VOL_2",
+    // "VALOR_TOTAL_CON_PAGO_VOL_1",
+    // "VALOR_PAGO_VOLUNTARIO_3",
+    // "VALOR_PAGO_VOLUNTARIO_2",
+    // "VALOR_PAGO_VOLUNTARIO_1",
+    // "VALOR_PAGAR_1",
+    // "VALOR_PAGAR_2",
+    // "VALOR_PAGAR_3"
   ];
 
   var nn = new NodeNavigator("#nodeNavigator", 600).id("i");
@@ -101,8 +101,8 @@
   //       nn.data(data);
   //   }
   // });
-  
-  d3.csv("data.csv", type, function (err, data) {
+
+  d3.csv("predialsampler/", type, function (err, data) {
     if (err) throw err;
     console.log(data.length);
     // data = d3.dsvFormat(";").formatRows(data);
