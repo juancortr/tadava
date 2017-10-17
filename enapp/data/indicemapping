@@ -1,4 +1,3 @@
-PUT /predial
 curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -d'
 {
     "settings" : {
@@ -72,3 +71,6 @@ curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -
   }
  }
 }
+
+
+curl -XDELETE 'localhost:9200/predial?pretty'
