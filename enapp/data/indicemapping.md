@@ -1,18 +1,14 @@
-'''
+Creación de índice y mapping de atributos
+
+```
 curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -d'
 {
-    "settings" : {
+"settings" : {
         "index" : {
             "number_of_shards" : 3, 
             "number_of_replicas" : 1
         }
-    }
-}'
-'''
-
-
-curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -d'
-{
+    },
  "mappings" : {
   "_default_" : {
    "properties" : {
@@ -33,9 +29,9 @@ curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -
 			"TARIFA_PLENA": { "type" : "double" },
 			"AJUSTE_TARIFA": { "type" : "double" },
 			"PORCENTAJE_EXENCION": {"type": "text" },
-			"ID_UNICO_CONTRIBUYENTE": {"type": "keyboard" },
-			"TIPO_SOPORTE": {"type": "keyboard" },
-			"NUMERO_SOPORTE_TRIBUTARIO": {"type": "keyboard" },
+			"ID_UNICO_CONTRIBUYENTE": {"type": "keyword" },
+			"TIPO_SOPORTE": {"type": "keyword" },
+			"NUMERO_SOPORTE_TRIBUTARIO": {"type": "keyword" },
 			"AUTOAVALUO": { "type" : "double" },
 			"IMPUESTO_CARGO": { "type" : "double" },
 			"FECHA_LIMITE_1": { "type" : "date" },
@@ -60,7 +56,7 @@ curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -
 			"VALOR_TOTAL_CON_PAGO_VOL_2": { "type" : "double" },
 			"FECHA_LIMITE_3": { "type" : "date" },
 			"AJUSTE_EQUIDAD_3": { "type" : "double" },
-			"IMPUESTO_AJUSTADO_3",: { "type" : "double" }
+			"IMPUESTO_AJUSTADO_3",: { "type" : "double" },
 			"SALDO_CARGO_3": { "type" : "double" },
 			"VALOR_SANCION_3": { "type" : "double" },
 			"VALOR_PAGAR_3": { "type" : "double" },
@@ -71,7 +67,9 @@ curl -XPUT 'localhost:9200/predial?pretty' -H 'Content-Type: application/json' -
    }
   }
  }
-}
-'
-
+}'
+```
+Remover el índice
+```
 curl -XDELETE 'localhost:9200/predial?pretty'
+```
