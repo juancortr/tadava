@@ -1,4 +1,5 @@
-# NodeNavigator [a link] (https://github.com/john-guerra/NodeNavigator) and elasticsearch integration experiments.
+# NodeNavigator + Elasticsearch
+This experiment integrates NodeNavigator[a link](https://github.com/john-guerra/NodeNavigator) and elasticsearch integration experiments.
 
 ## API Routes o deployed application
 Sample 600 records on natural order
