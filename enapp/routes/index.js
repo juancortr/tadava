@@ -9,7 +9,7 @@ router.get('/predial', function(req, res, next) {
   client.search({
     index: 'predial',
     body: {
-      size: 500,
+      size: 5000,
       query: {
        function_score: {
         query: {
@@ -58,7 +58,8 @@ router.get('/predial', function(req, res, next) {
       acc = acc.slice(0, -2);
 
       var content = encabz + '\n' + acc;
-      // fs.writeFileSync('public/data.csv', content);
+      //fs.writeFileSync('public/data.csv', content);
+      //res.sendFile("index.html", {"root":"public"});
       //res.send(acc);
 
       // send the data as csv
@@ -132,9 +133,9 @@ router.get('/predialsampler', function(req, res, next) {
       // send the data as csv
       res.set('Content-Type', 'application/octet-stream');
       res.send(content);
-      //res.send(acc);
-
-      // res.sendFile("index.html", {"root":"public"});
+      //fs.writeFileSync('public/data.csv', content);
+      
+      //res.sendFile("index.html", {"root":"public"});
   }, function (err) {
       console.trace(err.message);
   });
