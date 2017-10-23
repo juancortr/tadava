@@ -82,3 +82,18 @@ PUT predial
  }
 }
 ```
+
+En el cluster CAOBA se encuentra una instalación de elasticsearch para hadoop (elasticsearch 2.3.3) en el siguiente endpoint: 
+```
+http://caoba-access.virtual.uniandes.edu.co:8083/
+```
+El estado del cluster se puede consultar en el siguiente link:
+```
+http://caoba-access.virtual.uniandes.edu.co:8083/_cluster/health
+```
+Los índices del cluster elasticsearch se pueden consultar en:
+```
+http://caoba-access.virtual.uniandes.edu.co:8083/_cat/indices
+```
+
+Para la creación en el cluster CAOBA, los tipos de datos *keyword* y *text* deben ser manejados como campos de tipo *string* pues la versión 2.3 no maneja esos tipos de datos adicionales.
