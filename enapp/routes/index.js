@@ -71,6 +71,65 @@ router.get('/predial', function(req, res, next) {
   //res.render('index', { title: 'Express' });
 });
 
+//Rounting de selección en rango númerico de atributo por sampling
+// TODO definir e implementar estrategia de sampling
+router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next) {
+  var indice = req.params.index,
+      attrib = req.params.attr,
+      limInf = parseInt(req.params.from),
+      limSup = parseInt(req.params.to),
+      samplesize = parseInt(req.params.samplesize);
+
+  //Random sampling
+  var qbody = "{size:"+samplesize+", query:{range:{"+attrib+":{gte:"+limInf+", lte:"+limSup+"}}}}";
+  console.log(quri);
+
+  client.search({
+    index: indice,
+    body: qbody
+  }).then(function (resp) {
+      reponse = resp.hits.hits;
+      res.send(resp);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  //res.render('index', { title: 'Express' });
+});
+
+
+//Routing de sampling sobre índice
+router.get('/:index/sample/:samplesize', function(req, res, next) {
+  var indice = req.params.index,
+       samplesize = parseInt(req.params.samplesize);
+  //Random sampling
+  client.search({
+    index: indice,
+    body: {
+      size: samplesize,
+      query: {
+       function_score: {
+        query: {
+          match_all: {}
+        },
+        functions: [
+          {
+            random_score: {}
+          }
+        ]
+      }
+    },
+    //Criterio de sort
+    sort:[ {"_score": "desc"}]
+    }
+  }).then(function (resp) {
+      reponse = resp.hits.hits;
+      res.send(reponse);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  //res.render('index', { title: 'Express' });
+});
+
 //Sampling
 router.get('/predialsampler', function(req, res, next) {
   //Random sampling
