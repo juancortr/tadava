@@ -63,8 +63,9 @@ router.get('/predial', function(req, res, next) {
       //res.send(acc);
 
       // send the data as csv
-      res.set('Content-Type', 'application/octet-stream');
-      res.send(content);
+      //res.set('Content-Type', 'application/octet-stream');
+      //res.send(content);
+      res.render("index.html", {data:content}); 
   }, function (err) {
       console.trace(err.message);
   });
@@ -81,8 +82,7 @@ router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next
       samplesize = parseInt(req.params.samplesize);
 
   //Random sampling
-  var qbody = "{size:"+samplesize+", query:{range:{"+attrib+":{gte:"+limInf+", lte:"+limSup+"}}}}";
-  console.log(quri);
+  var qbody = '{"size":'+samplesize+', "query":{"range":{"'+attrib+'":{"gte":'+limInf+', "lte":'+limSup+'}}}}';
 
   client.search({
     index: indice,
@@ -190,11 +190,12 @@ router.get('/predialsampler', function(req, res, next) {
       var content = encabz + '\n' + acc;
 
       // send the data as csv
-      res.set('Content-Type', 'application/octet-stream');
-      res.send(content);
+      //res.set('Content-Type', 'application/octet-stream');
+      //res.send(content);
       //fs.writeFileSync('public/data.csv', content);
       
-      //res.sendFile("index.html", {"root":"public"});
+      //res.render("index", {data:content, "root":"public"});
+      res.sendFile("index.html", {"datos":content,"root":"public"});
   }, function (err) {
       console.trace(err.message);
   });
@@ -205,5 +206,44 @@ router.get('/', function(req, res, next) {
   res.sendFile("index.html", {"root":"public"});
 });
 
+//Routing de sampling sobre índice
+router.get('/:index/sample/:samplesize/step/:stepsize', function(req, res, next) {
+  var indice = req.params.index,
+       samplesize = parseInt(req.params.samplesize),
+       stepsize = parseInt(req.params.stepsize);
+  //Random sampling
+  client.search({
+    index: indice,
+    body: {
+      size: samplesize,
+      query: {  //Deprecated after ES 5.0
+        bool: {
+        must: {
+        //filtered: {
+          //filter: {
+            script: {
+              script:{ 
+                source: "doc['PANDAS_ID'].value % params.n == 0",
+                lang:"painless",
+                params : {
+                  "n" : stepsize
+                }
+              }
+            }
+          //}
+        }
+      }
+    },
+    //Criterio de sort
+    sort:[ {"PANDAS_ID": "desc"}]
+    }
+  }).then(function (resp) {
+      reponse = resp.hits.hits;
+      res.send(reponse);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  
+});
 
 module.exports = router;

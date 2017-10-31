@@ -16,7 +16,8 @@
 <script src="javascripts/NodeNavigator/NodeNavigator.js"></script>
 
 <script>
-
+  var datos = "{{ datos }}";
+  console.log(datos);
   var catColumns = [
     //"MUNICIPIO_ENVIO",
     "ID_PREDIO",
@@ -81,28 +82,8 @@
 
   var data =[];
   var i =0;
-  // Papa.parse("./head.csv", {
-  //   // download: true,
-  //   delimiter:";",
-  //   header: true,
-  //   // worker: true,
-  //   download:true,
-  //   step: function(row) {
-  //       // console.log("Row:", row.data);
-  //       row.data[0].i= i++;
-  //       data.push(row.data[0]);
-  //       // if (i%100000===0) {
-  //       //     console.log("redraw 100k");
-  //       //     nn.data(data);
-  //       // }
-  //   },
-  //   complete: function() {
-  //       console.log("All done!");
-  //       nn.data(data);
-  //   }
-  // });
 
-d3.csv("/predialsampler", type, function (err, data) {
+d3.csv("predialsampler/", type, function (err, data) {
   //d3.csv("predialsampler/", type, function (err, data) {
     if (err) throw err;
     console.log(data.length);
@@ -116,6 +97,7 @@ d3.csv("/predialsampler", type, function (err, data) {
   var fmt = d3.timeParse("%d-%m-%Y %H:%M:%S %p");
 
   function type(row) {/*
+    Transformaciones de carga
     var split = row["car-id"].split("-");
     row.Timestamp = fmt(row.Timestamp);
     row.hours = row.Timestamp.getHours();
