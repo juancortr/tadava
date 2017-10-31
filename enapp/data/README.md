@@ -1,6 +1,6 @@
 ### Instrucciones para la inserción de datos a elastic desde logstash utilizando el Bulk API
 
-La ruta de acceso al archivo corregido en el cluster CAOBA es: XXXXX
+La ruta de acceso al endpoint el cluster CAOBA es: http://caoba-access.virtual.uniandes.edu.co:8083/
 
 1. Elasticsearch debe estar corriendo antes de iniciar la inserción. También se debe iniciar la ejecución de Kubana. 
 2. Se debe crear en elasticsearch un índice con las instrucciones descritas en indicemapping.md
