@@ -75,6 +75,7 @@ router.get('/predial', function(req, res, next) {
 //Rounting de selección en rango númerico de atributo por sampling
 // TODO definir e implementar estrategia de sampling
 router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next) {
+ var start = new Date();
   var indice = req.params.index,
       attrib = req.params.attr,
       limInf = parseInt(req.params.from),
@@ -88,6 +89,33 @@ router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next
     index: indice,
     body: qbody
   }).then(function (resp) {
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
+      reponse = resp.hits.hits;
+      res.send(resp);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  //res.render('index', { title: 'Express' });
+});
+
+router.get('/:index/:attr/:from-:to/sample/:samplesize/scored', function(req, res, next) {
+ var start = new Date();
+  var indice = req.params.index,
+      attrib = req.params.attr,
+      limInf = parseInt(req.params.from),
+      limSup = parseInt(req.params.to),
+      samplesize = parseInt(req.params.samplesize);
+
+  //Random sampling
+  var qbody = '{"size":'+samplesize+', "query":{"function_score":{"filter":{"range":{"'+attrib+'":{"gte":'+limInf+', "lte":'+limSup+'}}}}, "score_mode":"multiply"}}';
+
+  client.search({
+    index: indice,
+    body: qbody
+  }).then(function (resp) {
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
       reponse = resp.hits.hits;
       res.send(resp);
   }, function (err) {
@@ -98,7 +126,9 @@ router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next
 
 
 //Routing de sampling sobre índice
-router.get('/:index/sample/:samplesize', function(req, res, next) {
+router.get('/:index/sample/:samplesize/scored', function(req, res, next) {
+ var start = new Date();
+
   var indice = req.params.index,
        samplesize = parseInt(req.params.samplesize);
   //Random sampling
@@ -108,6 +138,70 @@ router.get('/:index/sample/:samplesize', function(req, res, next) {
       size: samplesize,
       query: {
        function_score: {
+        query: {
+          match: { ID_UNICO_CONTRIBUYENTE:"1312012"}
+          //range:{ 
+            //AJUSTE_TARIFA:{
+            //  gte: 140000, 
+            //  lte:160000
+            //}
+          //}
+
+        },
+        functions: [
+          {
+            filter: {
+          range:{ 
+            SALDO_CARGO_2:{
+              lte: 12000
+            }
+          }
+
+        },
+            weight: 2
+          },
+          {
+            filter: {
+          range:{ 
+            SALDO_CARGO_2:{
+              gt: 12000
+            }
+          }
+
+        },
+            weight: 1
+          }
+        ],
+        score_mode: "multiply"
+      }
+    }
+  }
+  //,
+    //Criterio de sort
+    //sort: [{_score: "desc"}]
+  }).then(function (resp) {
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
+      reponse = resp.hits.hits;
+      res.send(reponse);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  //res.render('index', { title: 'Express' });
+});
+
+router.get('/:index/sample/:samplesize', function(req, res, next) {
+ var start = new Date();
+
+  var indice = req.params.index,
+       samplesize = parseInt(req.params.samplesize);
+  //Random sampling
+  client.search({
+    index: indice,
+    body: {
+      size: samplesize,
+      query: {
+        function_score: {
         query: {
           match_all: {}
         },
@@ -122,6 +216,8 @@ router.get('/:index/sample/:samplesize', function(req, res, next) {
     sort:[ {"_score": "desc"}]
     }
   }).then(function (resp) {
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
       reponse = resp.hits.hits;
       res.send(reponse);
   }, function (err) {
