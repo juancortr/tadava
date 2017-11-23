@@ -4,10 +4,12 @@ var client = require('../connection.js');
 var fs = require('fs');
 
 /* GET home page. */
-router.get('/predial', function(req, res, next) {
+router.get('/:index', function(req, res, next) {
+ var start = new Date();
 	//Random sampling
+  var indice = req.params.index;
   client.search({
-    index: 'predial',
+    index: indice,
     body: {
       size: 5000,
       query: {
@@ -26,6 +28,12 @@ router.get('/predial', function(req, res, next) {
     sort:[ {"_score": "desc"}]
     }
   }).then(function (resp) {
+
+      reponse = resp.hits.hits;
+      res.send(reponse);
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
+    /**
       reponse = resp.hits.hits;
       var encab = [];
       if(reponse[0]){
@@ -65,7 +73,7 @@ router.get('/predial', function(req, res, next) {
       // send the data as csv
       //res.set('Content-Type', 'application/octet-stream');
       //res.send(content);
-      res.render("index.html", {data:content}); 
+      res.render("index.html", {data:content}); */
   }, function (err) {
       console.trace(err.message);
   });
@@ -84,6 +92,32 @@ router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next
 
   //Random sampling
   var qbody = '{"size":'+samplesize+', "query":{"range":{"'+attrib+'":{"gte":'+limInf+', "lte":'+limSup+'}}}}';
+
+  client.search({
+    index: indice,
+    body: qbody
+  }).then(function (resp) {
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
+      reponse = resp.hits.hits;
+      res.send(resp);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  //res.render('index', { title: 'Express' });
+});
+
+//Rounting de selección en rango númerico de atributo por sampling probabilistico
+router.get('/:index/:attr/:from-:to/sample/:samplesize/probabilistic', function(req, res, next) {
+ var start = new Date();
+  var indice = req.params.index,
+      attrib = req.params.attr,
+      limInf = parseInt(req.params.from),
+      limSup = parseInt(req.params.to),
+      samplesize = parseInt(req.params.samplesize);
+
+  //Random sampling
+  var qbody = '{"size":'+samplesize+', query: {  "function_score": {"query": {"range":{"'+attrib+'":{"gte":'+limInf+', "lte":'+limSup+'}}},"functions":[{"script_score":{"script": "if (_score.doubleValue()> 1/2481705){return 1;} else {return 0;}"}}],"boost_mode":"replace"}}}';
 
   client.search({
     index: indice,
@@ -213,7 +247,8 @@ router.get('/:index/sample/:samplesize', function(req, res, next) {
       }
     },
     //Criterio de sort
-    sort:[ {"_score": "desc"}]
+    //sort:[ {"_score": "desc"}]
+    sort:[ {"ESTRATO": "desc"}]
     }
   }).then(function (resp) {
     var end = new Date() - start;
@@ -336,6 +371,77 @@ router.get('/:index/sample/:samplesize/step/:stepsize', function(req, res, next)
   }).then(function (resp) {
       reponse = resp.hits.hits;
       res.send(reponse);
+  }, function (err) {
+
+      console.trace(err.message);
+  });
+  
+});
+
+//Routing de sampling sobre índice
+router.get('/:index/sample/:samplesize/probabilistic/step/:step/seed/:seed', function(req, res, next) {
+ var start = new Date();
+  var indice = req.params.index,
+       samplesize = parseInt(req.params.samplesize),
+       seedP = parseInt(req.params.seed),
+       step = parseInt(req.params.step);
+  //var datasetSize = 305;
+  //var infdistrlim = 1/datasetSize;
+  
+  //Variable para calcular el limite inferior de probabilidad para que un doc sea seleccionado
+  var infdistrlim = 1/step;
+
+  //Random sampling
+  client.search({
+    index: indice,
+    body: {
+      //min_score excluye aquellos documentos cuyo _score sea menor al especificado
+      min_score: 0.5,
+      size: samplesize,
+
+      //track_scores se utiliza cuando hay un sort sobre alguno de los campos del documento
+      //de esta forma el _score igual es calculado independientemente del criterio de sort
+      track_scores:true,
+
+      //proyeccion de los campos del documento que son entregados en la respuesta
+      _source: ["e_id"],
+      query: {
+       function_score: {
+        query: {
+          function_score:{
+            functions:[{
+              random_score: {
+                //El uso de la misma semilla permite la aleatoriedad constante
+                seed: seedP
+              }
+            }]
+          }
+        },
+        functions: [
+          {
+            script_score:{
+              script: {
+                params:{
+                  param1: infdistrlim
+                },
+                inline: "if (_score.doubleValue() < param1){return 1;} else {return 0;}"
+              }
+            }
+          }
+        ]
+        //Reemplazo del score producido por el query con el score obtenido probabilisticamente
+        ,boost_mode:"replace"
+      }
+    }
+    }
+    //Criterio de sort
+    //,sort:[ {"e_id": "desc"}]
+    ,sort: "e_id"
+  }).then(function (resp) {
+      reponse = resp.hits.hits;
+      res.send(reponse);
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
   }, function (err) {
       console.trace(err.message);
   });
