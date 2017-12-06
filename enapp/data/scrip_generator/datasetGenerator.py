@@ -13,19 +13,27 @@ fake = Faker('en_US')
 #samples = [100, 1000, 10000, 100000, 500000, 1000000, 5000000, 10000000]
 
 #Samples para el analisis de arquitectura de 1, 3 y 5 nodos
-#samples = [100000, 500000, 1000000, 5000000, 10000000]
-samples = [5000000, 10000000]
+samples2 = [100000, 500000, 1000000, 5000000, 10000000]
+#samples = [100000, 500000, 1000000]
 
 def loadSamples():
-	print('Loading samples...')
 	for elem in samples:
-		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem)+" --type basicdata csv /Users/JCAMILORT/Developer/esexploration/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem)+".txt"
+		print('Loading samples...'+str(elem))
+		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem)+"_3 --type basicdata csv /Users/JCAMILORT/Developer/esexploration/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem)+".txt"
+		os.system(comando)
+	for elem3 in samples2:
+		print('Loading 3-samples...'+str(elem3))
+		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem3)+"_3 --type basicdata csv /Users/JCAMILORT/Developer/esexploration/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem2)+".txt"
+		os.system(comando)
+	for elem5 in samples2:
+		print('Loading 5-samples...'+str(elem5))
+		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem5)+"_3 --type basicdata csv /Users/JCAMILORT/Developer/esexploration/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem2)+".txt"
 		os.system(comando)
 
 def createMappings():
 	for elem in samples:
 		print('Creating mapping for '+str(elem))
-		sentencia = "curl -XPOST caoba-access.virtual.uniandes.edu.co:8083/sample_"+str(elem)+" -d '{\"settings\" : {\"number_of_shards\" : 1 },\"mappings\" : {\"basicdata\" : {\"properties\" : {\"id\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"first_name\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"last_name\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"married\" : { \"type\" : \"boolean\"},\"ip\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"calification\" : { \"type\" : \"double\"},\"posts\" : { \"type\" : \"long\" },\"date\" : {\"type\":\"date\", \"format\": \"yyyy-MM-dd HH:mm:ss\" }}}}}'"
+		sentencia = "curl -XPOST caoba-access.virtual.uniandes.edu.co:8083/sample_"+str(elem)+"_5 -d '{\"settings\" : {\"number_of_shards\" : 5 },\"mappings\" : {\"basicdata\" : {\"properties\" : {\"id\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"first_name\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"last_name\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"married\" : { \"type\" : \"boolean\"},\"ip\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"calification\" : { \"type\" : \"double\"},\"posts\" : { \"type\" : \"long\" },\"date\" : {\"type\":\"date\", \"format\": \"yyyy-MM-dd HH:mm:ss\" }}}}}'"
 		os.system(sentencia)
 
 def generateDatasets():
@@ -42,6 +50,6 @@ def generateDatasets():
 			file.write(ligne) 
 		file.close()
 
-#createMappings()
+createMappings()
 #generateDatasets()
-loadSamples()
+#loadSamples()
