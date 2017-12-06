@@ -11,6 +11,9 @@ from faker import Faker
 fake = Faker('en_US')
 
 #samples = [100, 1000, 10000, 100000, 500000, 1000000, 5000000, 10000000]
+
+#Samples para el analisis de arquitectura de 1, 3 y 5 nodos
+#samples = [100000, 500000, 1000000, 5000000, 10000000]
 samples = [5000000, 10000000]
 
 def loadSamples():

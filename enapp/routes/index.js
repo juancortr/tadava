@@ -379,17 +379,18 @@ router.get('/:index/sample/:samplesize/step/:stepsize', function(req, res, next)
 });
 
 //Routing de sampling sobre índice
-router.get('/:index/sample/:samplesize/probabilistic/step/:step/seed/:seed', function(req, res, next) {
+router.get('/:index/sample/:samplesize/probabilistic/step/:step', function(req, res, next) {
  var start = new Date();
   var indice = req.params.index,
        samplesize = parseInt(req.params.samplesize),
-       seedP = parseInt(req.params.seed),
        step = parseInt(req.params.step);
-  //var datasetSize = 305;
+  var datasetSize = 305;
   //var infdistrlim = 1/datasetSize;
   
   //Variable para calcular el limite inferior de probabilidad para que un doc sea seleccionado
-  var infdistrlim = 1/step;
+  //var infdistrlim = 1/step;
+  var infdistrlim = step/datasetSize
+  console.log("Parametro: "+infdistrlim);
 
   //Random sampling
   client.search({
@@ -412,7 +413,8 @@ router.get('/:index/sample/:samplesize/probabilistic/step/:step/seed/:seed', fun
             functions:[{
               random_score: {
                 //El uso de la misma semilla permite la aleatoriedad constante
-                seed: seedP
+                // si no se especifica, se usa el tiempo actual
+                //seed: 3
               }
             }]
           }

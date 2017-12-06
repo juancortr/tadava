@@ -18,7 +18,7 @@ Our ElasticSearch index is located in the URL caoba-access.virtual.uniandes.edu.
 
 The command used to create the index and the mappings for the dataset attributes is:
 ´´´
-curl -XPOST caoba-access.virtual.uniandes.edu.co:8083/sample_XXXXX -d '{
+curl -XPOST caoba-access.virtual.uniandes.edu.co:8083/sample_XXXX -d '{
     "settings" : {
         "number_of_shards" : 1
     },
