@@ -450,4 +450,186 @@ router.get('/:index/sample/:samplesize/probabilistic/step/:step', function(req, 
   
 });
 
+// Test: Step vs dataset size vs execution time
+router.get('/test/test1', function(req, res, next) {
+
+  var iterations = [1, 5, 10, 20, 50 ,100];
+  //var iterations = [1, 5, 10];
+
+  //var indices = ['sample_100','sample_10000','sample_100000','sample_500000','sample_1000000','sample_5000000','sample_10000000']; //Indices name -> datasetSize
+  
+  var datasetSizes = [100, 1000, 10000, 100000, 500000,1000000, 5000000, 10000000];
+  //var datasetSizes = [100, 1000, 10000];
+
+  samplesize = 10000; //max results window given by elastic search
+
+  var steps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 10000, 20000, 50000, 100000, 200000, 500000]
+  //var steps = [1, 2, 5, 10, 20]
+
+  for ( var it = 0; it<iterations.length; it++){
+    var perFaire = iterations[it];
+    console.log("Iteration#: "+perFaire);
+
+    for( var executor = 0 ; executor < perFaire; executor++){
+      console.log("Execution#: "+executor);
+
+      for( var ind = 0; ind < datasetSizes.length ; ind++){
+        var datasetSize = datasetSizes[ind];
+        var indice = "sample_"+datasetSize;
+        console.log("Index: "+indice)
+        for( var st = 0; st< steps.length ; st++){
+          var setp = steps[st];
+
+          var infdistrlim = setp/datasetSize;
+          var start = new Date();
+          console.log("Step: "+setp);
+          executeTest(perFaire, indice, setp, datasetSize);
+          
+          /**client.search({
+            index: indice,
+            body: {
+              //min_score excluye aquellos documentos cuyo _score sea menor al especificado
+              min_score: 0.5,
+              size: samplesize,
+
+              //track_scores se utiliza cuando hay un sort sobre alguno de los campos del documento
+              //de esta forma el _score igual es calculado independientemente del criterio de sort
+              track_scores:true,
+
+              //proyeccion de los campos del documento que son entregados en la respuesta
+              _source: ["id"],
+              query: {
+               function_score: {
+                query: {
+                  function_score:{
+                    functions:[{
+                      random_score: {
+                        //El uso de la misma semilla permite la aleatoriedad constante
+                        // si no se especifica, se usa el tiempo actual
+                        //seed: 3
+                      }
+                    }]
+                  }
+                },
+                functions: [
+                  {
+                    script_score:{
+                      script: {
+                        params:{
+                          param1: infdistrlim
+                        },
+                        inline: "if (_score.doubleValue() < param1){return 1;} else {return 0;}"
+                      }
+                    }
+                  }
+                ]
+                //Reemplazo del score producido por el query con el score obtenido probabilisticamente
+                ,boost_mode:"replace"
+              }
+            }
+          }
+          //Criterio de sort
+          //,sort:[ {"e_id": "desc"}]
+          ,sort: "id"
+        }).then(function (resp) {
+
+            reponse = resp.hits.hits;
+            var end = new Date() - start;
+            //Write to file
+            var linea = perFaire+","+resp.hits.hits[0]._index+","+ setp + ","+resp.took;
+            fs.appendFile('data_from_test_'+perFaire+".csv", linea+'\n', function (err) {
+              if (err) {
+                // append failed
+              } else {
+                // done
+              }
+            });
+
+            fs.appendFile('example.txt', String(resp)+'\n', function (err) {
+              if (err) {
+                // append failed
+              } else {
+                // done
+              }
+            });
+            console.log(linea);
+            res.send(reponse);
+        }, function (err) {
+            console.trace(err.message);
+        });
+        */
+        }
+      }
+    }
+  }
+  
+});
+
+function executeTest(it, index, step, datasetSize){
+  var infdistrlim = step/datasetSize;
+  client.search({
+            index: index,
+            body: {
+              //min_score excluye aquellos documentos cuyo _score sea menor al especificado
+              min_score: 0.5,
+              size: samplesize,
+
+              //track_scores se utiliza cuando hay un sort sobre alguno de los campos del documento
+              //de esta forma el _score igual es calculado independientemente del criterio de sort
+              track_scores:true,
+
+              //proyeccion de los campos del documento que son entregados en la respuesta
+              _source: ["id"],
+              query: {
+               function_score: {
+                query: {
+                  function_score:{
+                    functions:[{
+                      random_score: {
+                        //El uso de la misma semilla permite la aleatoriedad constante
+                        // si no se especifica, se usa el tiempo actual
+                        //seed: 3
+                      }
+                    }]
+                  }
+                },
+                functions: [
+                  {
+                    script_score:{
+                      script: {
+                        params:{
+                          param1: infdistrlim
+                        },
+                        inline: "if (_score.doubleValue() < param1){return 1;} else {return 0;}"
+                      }
+                    }
+                  }
+                ]
+                //Reemplazo del score producido por el query con el score obtenido probabilisticamente
+                ,boost_mode:"replace"
+              }
+            }
+          }
+          //Criterio de sort
+          //,sort:[ {"e_id": "desc"}]
+          ,sort: "id"
+        }).then(function (resp) {
+            reponse = resp.hits.hits;
+            //Write to file
+            var linea = it+","+resp.hits.hits[0]._index+","+ step + ","+resp.took;
+            fs.appendFile('data_from_test_'+it+".csv", linea+'\n', function (err) {
+              if (err) {
+                // append failed
+              } else {
+                // done
+              }
+            });
+            console.log(linea);
+            //Siguiente consulta
+        }, function (err) {
+            console.trace(err.message);
+        });
+  }
+
+
 module.exports = router;
