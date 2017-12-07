@@ -450,6 +450,15 @@ router.get('/:index/sample/:samplesize/probabilistic/step/:step', function(req, 
   
 });
 
+
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
 // Test: Step vs dataset size vs execution time
 router.get('/test/test1', function(req, res, next) {
 
@@ -483,6 +492,8 @@ router.get('/test/test1', function(req, res, next) {
           var infdistrlim = setp/datasetSize;
           var start = new Date();
           console.log("Step: "+setp);
+
+          sleep(2000);
           executeTest(perFaire, indice, setp, datasetSize);
           
           /**client.search({
