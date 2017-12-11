@@ -4,7 +4,7 @@ var client = require('../connection.js');
 var fs = require('fs');
 
 /* GET home page. */
-router.get('/:index', function(req, res, next) {
+router.get('/index/:index', function(req, res, next) {
  var start = new Date();
 	//Random sampling
   var indice = req.params.index;
@@ -462,13 +462,13 @@ function sleep(milliseconds) {
 // Test: Step vs dataset size vs execution time
 router.get('/test/test1', function(req, res, next) {
 
-  var iterations = [1, 5, 10, 20, 50 ,100];
-  //var iterations = [1, 5, 10];
+  //var iterations = [1, 5, 10, 20, 50 ,100];
+  var iterations = [1, 5, 10];
 
   //var indices = ['sample_100','sample_10000','sample_100000','sample_500000','sample_1000000','sample_5000000','sample_10000000']; //Indices name -> datasetSize
   
-  var datasetSizes = [100, 1000, 10000, 100000, 500000,1000000, 5000000, 10000000];
-  //var datasetSizes = [100, 1000, 10000];
+  //var datasetSizes = [100, 1000, 10000, 100000, 500000,1000000, 5000000, 10000000];
+  var datasetSizes = [100, 1000, 10000];
 
   samplesize = 10000; //max results window given by elastic search
 
@@ -492,10 +492,6 @@ router.get('/test/test1', function(req, res, next) {
           var infdistrlim = setp/datasetSize;
           var start = new Date();
           console.log("Step: "+setp);
-
-          sleep(2000);
-          executeTest(perFaire, indice, setp, datasetSize);
-          
           /**client.search({
             index: indice,
             body: {
@@ -543,20 +539,12 @@ router.get('/test/test1', function(req, res, next) {
           //,sort:[ {"e_id": "desc"}]
           ,sort: "id"
         }).then(function (resp) {
-
             reponse = resp.hits.hits;
-            var end = new Date() - start;
+            console.log("Resp");
+            console.log(reponse);
             //Write to file
-            var linea = perFaire+","+resp.hits.hits[0]._index+","+ setp + ","+resp.took;
-            fs.appendFile('data_from_test_'+perFaire+".csv", linea+'\n', function (err) {
-              if (err) {
-                // append failed
-              } else {
-                // done
-              }
-            });
-
-            fs.appendFile('example.txt', String(resp)+'\n', function (err) {
+            var linea = it+","+resp.hits.hits[0]._index+","+ setp + ","+resp.took;
+            fs.appendFile('data_from_test_'+it+".csv", linea+'\n', function (err) {
               if (err) {
                 // append failed
               } else {
@@ -564,11 +552,13 @@ router.get('/test/test1', function(req, res, next) {
               }
             });
             console.log(linea);
-            res.send(reponse);
+            //Siguiente consulta
         }, function (err) {
             console.trace(err.message);
-        });
-        */
+        });*/
+          executeTest(perFaire, indice, setp, datasetSize);
+          //sleep(6000);
+          
         }
       }
     }
@@ -576,8 +566,9 @@ router.get('/test/test1', function(req, res, next) {
   
 });
 
-function executeTest(it, index, step, datasetSize){
+var executeTest = function (it, index, step, datasetSize){
   var infdistrlim = step/datasetSize;
+  console.log('Ejecutando consulta...');
   client.search({
             index: index,
             body: {
@@ -625,12 +616,14 @@ function executeTest(it, index, step, datasetSize){
           //,sort:[ {"e_id": "desc"}]
           ,sort: "id"
         }).then(function (resp) {
-            reponse = resp.hits.hits;
             //Write to file
-            var linea = it+","+resp.hits.hits[0]._index+","+ step + ","+resp.took;
+            //var linea = it+","+resp.hits.hits[0]._index+","+ step + ","+resp.took;
+            //var linea = it+","+indice+","+ step + ","+resp.took;
+            var linea = it+","+resp.hits.hits[0]._index+","+ step + ","+resp.took+ ","+resp.hits.hits.length+","+resp._shards.successful+","+resp._shards.failed;
             fs.appendFile('data_from_test_'+it+".csv", linea+'\n', function (err) {
               if (err) {
                 // append failed
+
               } else {
                 // done
               }
@@ -639,7 +632,16 @@ function executeTest(it, index, step, datasetSize){
             //Siguiente consulta
         }, function (err) {
             console.trace(err.message);
+            fs.appendFile('data_from_test_'+it+".csv", "error"+err.message+'\n', function (err) {
+              if (err) {
+                // append failed
+
+              } else {
+                // done
+              }
+            });
         });
+        console.log('Ejecutada');
   }
 
 
