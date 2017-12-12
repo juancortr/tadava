@@ -79,17 +79,18 @@ def test(indice, it, step,datasetSize, the_file):
 
 def main():
 	#iteraciones = [1, 5, 10, 20, 50 ,100]
-	iteraciones = [1, 5, 10]
+	iteraciones = [100]
+	#iteraciones = [1, 5, 10]
 	indices = []
 	steps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 10000, 20000, 50000, 100000, 200000, 500000]
-  	#datasetSizes = [100, 1000, 10000, 100000, 500000,1000000, 5000000, 10000000]
-	datasetSizes = [100, 1000, 10000]
+	datasetSizes = [100, 1000, 10000, 100000, 500000,1000000, 5000000, 10000000]
+	#datasetSizes = [100, 1000, 10000]
 	for e in datasetSizes:
 		with open('py_sample_'+str(e)+'.txt', 'a') as the_file:
 			for it in iteraciones:
 				for st in steps:
 					for x in range(0,it):
-						test('sample_'+str(e), it, st, e, the_file)
+						test('sample_'+str(e), x, st, e, the_file)
 
 #test('sample_100', 50,100)
 main()
