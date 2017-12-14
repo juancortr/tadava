@@ -70,19 +70,20 @@ def test(indice, it, step,datasetSize, the_file):
 	res = es.search(index=indice, doc_type="basicdata", body=bodyS, sort=["id"])
 	#print(res['_source'])
 	#print(str(len(res['hits']['hits']))+','+res['hits'][res['hits'].keys()[0]]['_index'])
-	if(len(res['hits']['hits'])==0):
-		linea =   indice+','+str(it)+','+str(step)+','+str(len(res['hits']['hits']))+','+str(res['took'])
-	else:
-		linea = str(res['hits']['hits'][0]['_index'])+','+str(it)+','+str(step)+','+str(len(res['hits']['hits']))+','+str(res['took'])
-	print(linea)
-	the_file.write(linea+'\n')
+	tamResp = len(res['hits']['hits'])
+	itTook = res['took']
+	for hit in res['hits']['hits']:
+		#TODO Revisar la estructura de una respuesta para registrar los id.
+		linea = str(hit['_index'])+','+str(it)+','+str(step)+','+str(tamResp)+','+str(itTook)+','+str(hit['id'])
+		print(linea)
+		the_file.write(linea+'\n')
 
 def main():
 	iteraciones = [1, 5, 10, 20, 50 ,100]
 	#iteraciones = [100]
 	#iteraciones = [1, 5, 10]
 	indices = ['_3','_5']
-	steps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 10000, 20000, 50000, 100000, 200000, 500000]
+	steps = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 10000, 20000, 50000, 100000, 200000, 500000]
 	#datasetSizes = [100, 1000, 10000, 100000, 500000,1000000, 5000000, 10000000]
 	datasetSizes = [100000, 500000,1000000, 5000000, 10000000]
 	for i in indices:
