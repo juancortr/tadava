@@ -18,21 +18,24 @@ fake = Faker('en_US')
 #samples = [7000000,8000000, 10000000, 15000000, 12000000]
 
 samples2 = [7000000,8000000, 15000000, 12000000]
-#samples = [7000000,8000000, 15000000, 12000000]
-samples = [7000000]
+samples = [7000000,8000000, 15000000, 12000000]
+#samples = [7000000]
+
+ruta = "/home/asistente/Documents/elasticSearchExperiments/enapp/data/scrip_generator/sample_"
+#ruta = "/home/asistente/Documents/elasticSearchExperiments/enapp/data/scrip_generator/sample_"
 
 def loadSamples():
 	for elem in samples:
 		print('Loading samples...'+str(elem))
-		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem)+" --type basicdata csv /home/asistente/Documents/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem)+".txt"
+		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem)+" --type basicdata csv "+ruta+str(elem)+".txt"
 		os.system(comando)
 	for elem3 in samples2:
 		print('Loading 3-samples...'+str(elem3))
-		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem3)+"_3 --type basicdata csv /home/asistente/Documents/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem3)+".txt"
+		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem3)+"_3 --type basicdata csv "+ruta+str(elem3)+".txt"
 		os.system(comando)
 	for elem5 in samples2:
 		print('Loading 5-samples...'+str(elem5))
-		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem5)+"_5 --type basicdata csv /home/asistente/Documents/elasticSearchExperiments/enapp/data/scrip_generator/sample_"+str(elem5)+".txt"
+		comando = "elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_"+str(elem5)+"_5 --type basicdata csv "+ruta+str(elem5)+".txt"
 		os.system(comando)
 
 def createMappings():
@@ -63,6 +66,6 @@ def generateDatasets():
 			file.write(ligne)
 		file.close()
 
-#createMappings()
+createMappings()
 #generateDatasets()
-loadSamples()
+#loadSamples()
