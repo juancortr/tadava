@@ -11,13 +11,16 @@
 </style>
 <body>
   <h1>Node Navigator + Elasticsearch </h1>
-<div id="nodeNavigator"></div>
+<div id="navio"></div>
 <script src="https://d3js.org/d3.v4.min.js"></script>
-<script src="javascripts/NodeNavigator/NodeNavigator.js"></script>
+<script src="https://d3js.org/d3-color.v1.min.js"></script>
+<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script type="text/javascript" src="javascripts/navio/src/navio.js"></script>
 
 <script>
-  var datos = "{{ datos }}";
-  console.log(datos);
+  var dats =  "<%- JSON.stringify(datos) %>";
+  console.log(dats);
   var catColumns = [
     //"MUNICIPIO_ENVIO",
     "ID_PREDIO",
@@ -75,19 +78,19 @@
     // "VALOR_PAGAR_3"
   ];
 
-  var nn = new NodeNavigator("#nodeNavigator", 600).id("i");
+  var nn = new navio("#navio", 600).id("i");
 
   catColumns.forEach((c) => nn.addCategoricalAttrib(c));
   seqColumns.forEach((c) => nn.addSequentialAttrib(c));
 
-  var data =[];
+  var data = [datos];
   var i =0;
 
-d3.csv("predialsampler/", type, function (err, data) {
+  d3.json(data, type, function (err, data) {
+    console.log(data);
   //d3.csv("predialsampler/", type, function (err, data) {
     if (err) throw err;
     console.log(data.length);
-    // data = d3.dsvFormat(";").formatRows(data);
     data.forEach((d,i) => d.i = i);
 
     nn.data(data);
@@ -96,20 +99,7 @@ d3.csv("predialsampler/", type, function (err, data) {
   //26/01/2016 04:21:05 a.m.
   var fmt = d3.timeParse("%d-%m-%Y %H:%M:%S %p");
 
-  function type(row) {/*
-    Transformaciones de carga
-    var split = row["car-id"].split("-");
-    row.Timestamp = fmt(row.Timestamp);
-    row.hours = row.Timestamp.getHours();
-    row.dayNight = row.hour < 6 || row.hour>18 ? "night": "day";
-    row.dayOfTheWeek = row.Timestamp.getDay();
-    row.minutes = row.Timestamp.getMinutes();
-    row.seconds = row.Timestamp.getSeconds();
-    row.year = row.Timestamp.getFullYear();
-    row.month = row.Timestamp.getMonth();
-    row.day = row.Timestamp.getDate();
-    row.carIdPart1 = +split[0];
-    row.carIdPart2 = +split[1];*/
+  function type(row) {
     return row;
   }
 </script>

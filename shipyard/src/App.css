@@ -1,0 +1,45 @@
+@import '~antd/dist/antd.css';
+@import 'styles/content.css';
+@import 'styles/menu.css';
+@import 'styles/load.css';
+
+body, html {
+  height: 100%;
+}
+body {
+  font-family: serif;
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  color: black;
+}
+
+.container {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 5vh auto 5vh;
+    grid-template-areas: 
+        "h h h h h h h h h h h h"
+        "m m m m c c c c c c c c"
+        "f f f f f f f f f f f f";
+}
+.header {
+    grid-area: h;
+    padding-left: 1em;
+    padding-right: 1em;
+    align-items: center;
+}
+.footer {
+    grid-area: f;
+    color: white;
+}
+#root > div > div.container > div.footer > a {
+  align-self: center;
+  color: white;
+}
+.center {
+  display: flex;
+}
+.logo {
+  margin-right: 1em; 
+}

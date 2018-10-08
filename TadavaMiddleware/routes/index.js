@@ -284,29 +284,26 @@ router.get('/:index/sample/:samplesize', function(req, res, next) {
 router.get('/predialsampler', function(req, res, next) {
   //Random sampling
   client.search({
-    index: 'predial',
+    index: 'sample_10000000_module',
     body: {
-      size:5000,
+      size:10000,
       query: {
-      },
-      aggs:{
-        sample:{
-          sampler:{
-            shard_size:1000
-          },
-          aggs:{
-            keywords:{
-              significant_terms:{
-                field: 'DESTINO.keyword',
-                exclude: ['RESIDENCIAL']
-              }
-            }
+       function_score: {
+        query: {
+          match_all: {}
+        },
+        functions: [
+          {
+            random_score: {}
           }
-        }
+        ]
+      }
       }
     }
   }).then(function (resp) {
       reponse = resp.hits.hits;
+
+      var jsonsource= [];
       console.log(reponse);
       var encab = [];
       if(reponse[0]){
@@ -319,7 +316,8 @@ router.get('/predialsampler', function(req, res, next) {
       var acc='';
       for (var rep in reponse){
         var pred = reponse[rep]['_source'];
-        for (llave in encab){
+        jsonsource.push(pred);
+        /*for (llave in encab){
           if(pred[encab[llave]]){
             acc+=pred[encab[llave]].replace(',','.')+',';
           }
@@ -328,24 +326,31 @@ router.get('/predialsampler', function(req, res, next) {
           }
         }
         acc = acc.slice(0, -1);
-        acc+='\n';
+        acc+='\n';*/
         //console.log(acc);
       }
 
-      var encabz = encab.join();
+      //var encabz = encab.join();
       //encab = encab.slice(0, -1);
 
-      acc = acc.slice(0, -2);
+      //acc = acc.slice(0, -2);
 
-      var content = encabz + '\n' + acc;
+      //var content = encabz + '\n' + acc;
 
       // send the data as csv
       //res.set('Content-Type', 'application/octet-stream');
       //res.send(content);
       //fs.writeFileSync('public/data.csv', content);
-      
-      //res.render("index", {data:content, "root":"public"});
-      res.sendFile("index.html", {"datos":content,"root":"public"});
+      //res.locals.datos = content;
+
+      //Convertir respuesta a csv
+      //res.render("index", {datos:content});
+
+      //Envio de respuesta en json
+      res.render("index", {datos:jsonsource});
+      //console.log(res);
+      //res.send(content);
+      //res.sendFile("index.html", {datos :content,"root":"public"});
   }, function (err) {
       console.trace(err.message);
   });
