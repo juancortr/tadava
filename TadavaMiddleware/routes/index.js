@@ -281,7 +281,7 @@ router.get('/:index/sample/:samplesize', function(req, res, next) {
 });
 
 //Sampling
-router.get('/predialsampler', function(req, res, next) {
+router.get('/home', function(req, res, next) {
   //Random sampling
   client.search({
     index: 'sample_10000000_module',

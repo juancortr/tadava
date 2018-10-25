@@ -16,9 +16,10 @@ fake = Faker('en_US')
 #samples2 = [100000, 500000, 1000000, 5000000, 10000000]
 #samples2 = [7000000,8000000, 10000000, 15000000, 12000000]
 #samples = [7000000,8000000, 10000000, 15000000, 12000000]
+samples = [15000000]
 
 #samples2 = [7000000,8000000, 15000000, 12000000]
-samples = [10000000]
+#samples = [10000000]
 samples2 = []
 #samples = [7000000,8000000, 15000000, 12000000]
 #samples = [7000000]
@@ -69,5 +70,5 @@ def generateDatasets():
 		file.close()
 
 #createMappings()
-#generateDatasets()
-loadSamples()
+generateDatasets()
+#loadSamples()

@@ -20,17 +20,7 @@ var catColumns = [
   var data = dats;
   var i =0;
 
-  /*d3.data(data, type, function (err, data) {
-    console.log(data);
-  //d3.csv("predialsampler/", type, function (err, data) {
-    if (err) throw err;
-    console.log(data.length);
-    data.forEach((d,i) => d.i = i);
-
-    nn.data(data);
-  });*/
-
-  data.forEach((d,i) => {  d.i = i; console.log(d);});
+  data.forEach((d,i) => {  d.i = i; /*console.log(d);*/});
   nn.data(data);
 
   //26/01/2016 04:21:05 a.m.
