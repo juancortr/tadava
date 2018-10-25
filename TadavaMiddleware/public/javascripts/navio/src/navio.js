@@ -26,7 +26,9 @@ function navio(selection, _h) {
     x0=0,
     y0=100,
     id = "__seqId",
-    updateCallback = function () {};
+    updateCallback = function () {},
+    tadavaCB = function(){},
+    filters = [];
 
   nv.margin = 10;
   nv.attribWidth = 15;
@@ -315,6 +317,29 @@ function navio(selection, _h) {
         first = dData.get(invertOrdinalScale(yScales[i], brushed[0])),
         // last = dData.get(invertOrdinalScale(yScales[i], brushed[1] -yScales[i].bandwidth()))
         last = dData.get(invertOrdinalScale(yScales[i], brushed[1]));
+
+        //TODO how to get min and max at attr
+        //TODO how to get attr
+        //Get Attr as in click
+        //Find value of first
+        //find value of last
+      var screenX = d3.event.sourceEvent.offsetX;
+
+      var itemAttr = invertOrdinalScale(xScale, screenX - levelScale(i));
+
+      if (itemAttr === undefined) return;
+
+      var filterElem = {};
+      filterElem.type = "range";
+      filterElem.params = {};
+      filterElem.params.attr = itemAttr;
+      filterElem.params.minValue = first[itemAttr];
+      filterElem.params.maxValue = last[itemAttr];
+      
+      filters.push(filterElem);
+
+      console.log("Filter Element", filterElem);
+
       console.log("first and last");
       console.log(first);
       console.log(last);
@@ -368,6 +393,7 @@ function navio(selection, _h) {
       console.log("click");
       var clientY = d3.mouse(d3.event.target)[1],
         clientX = d3.mouse(d3.event.target)[0];
+        console.log("Click Selection", clientX);
 
       onSelectByValueFromCoords(clientX, clientY);
     }
@@ -386,6 +412,18 @@ function navio(selection, _h) {
       if (itemAttr === undefined) return;
 
       var sel = dData.get(itemId);
+
+      //Filter element construction
+      var filterElem = {};
+      filterElem.type  = "click";
+      filterElem.params = {};
+      filterElem.params.attr = itemAttr;
+      filterElem.params.value = sel[itemAttr];
+      
+      filters.push(filterElem);
+
+      console.log("Filter Element", filterElem);
+
       before = performance.now();
       var filteredData = dataIs[i].filter(function (i) {
         data[i].visible = data[i][itemAttr] === sel[itemAttr];
@@ -854,6 +892,9 @@ function navio(selection, _h) {
     dataIs = dataIs.slice(0, dataIs.length-1);
     nv.updateData(dataIs, colScales);
     updateCallback(nv.getVisible());
+
+    filters.pop();
+    console.log("Filter removed from stack");
   }
 
   function moveAttrToPos(attr, pos) {
@@ -1031,6 +1072,10 @@ function navio(selection, _h) {
   nv.id = function(_) {
     return arguments.length ? (id = _, nv) : id;
   };
+
+  nv.tadavaCB = function(filters){
+    //Do something with filter stack
+  }
 
   return nv;
 }
