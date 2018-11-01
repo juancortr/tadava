@@ -4,6 +4,7 @@ function navio(selection, _h) {
   var nv = this || {},
     data = [], //Contains the original data attributes
     dataIs = [], //Contains only the indices to the data, is an array of arrays, one for each level
+    dataLs = [], //Contains tadava samples of the data, is an array of arrays, one for each level
     dData = d3.map(), // A hash for the data
     dDimensions = d3.map(),
     dimensionsOrder = [],
@@ -359,6 +360,7 @@ function navio(selection, _h) {
       //Assign the index
       for (var j = 0; j < filteredData.length; j++) {
         data[filteredData[j]].__i[i+1] = j;
+        console.log(data[filteredData[j]]);
       }
 
       var after = performance.now();
@@ -1008,6 +1010,12 @@ function navio(selection, _h) {
   // };
 
 
+  nv.dataFilterSample = function(_){
+    if(arguments.length){
+      console.log(arguments);
+
+    }
+  }
   nv.data = function(_) {
     if (!colScales.has("visible")) {
       nv.addAttrib("visible",
@@ -1073,8 +1081,13 @@ function navio(selection, _h) {
     return arguments.length ? (id = _, nv) : id;
   };
 
-  nv.tadavaCB = function(filters){
+  nv.tadavaCB = function(filters, url, index){
     //Do something with filter stack
+    // 1. Take filters and run each step as sampling calling URL endpoint
+    // 2. Get reponse and construct array of arrays
+    // 3. Display
+
+
   }
 
   return nv;

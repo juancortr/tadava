@@ -23,6 +23,11 @@ var catColumns = [
   data.forEach((d,i) => {  d.i = i; /*console.log(d);*/});
   nn.data(data);
 
+  var level = 0;
+  var ldata = {};
+  
+  nn.dataSample(level, ldata);
+
   //26/01/2016 04:21:05 a.m.
   var fmt = d3.timeParse("%d-%m-%Y %H:%M:%S %p");
 
