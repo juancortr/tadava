@@ -126,6 +126,32 @@ router.get('/:index/:attr/:from-:to/sample/:samplesize', function(req, res, next
   //res.render('index', { title: 'Express' });
 });
 
+//Routing seleccion por valor de atributo
+//Random Sampling
+router.get('/:index/:attr/:value/sample/:samplesize/probabilistic', function(req, res, next) {
+ var start = new Date();
+  var indice = req.params.index,
+      attrib = req.params.attr,
+      valor = req.params.value,
+      samplesize = parseInt(req.params.samplesize);
+
+  //Random sampling
+  var qbody = '{"size":'+samplesize+', query: {  "function_score": {"query": {"term":{"'+attrib+'":'+valor+'}},"functions":[{"script_score":{"script": "if (_score.doubleValue()> 1/'+samplesize+'){return 1;} else {return 0;}"}}],"boost_mode":"replace"}}}';
+
+  client.search({
+    index: indice,
+    body: qbody
+  }).then(function (resp) {
+    var end = new Date() - start;
+    console.log("Execution Time: "+end + " ms.");
+      reponse = resp.hits.hits;
+      res.send(resp);
+  }, function (err) {
+      console.trace(err.message);
+  });
+  //res.render('index', { title: 'Express' });
+});
+
 //Rounting de selección en rango númerico de atributo por sampling probabilistico
 router.get('/:index/:attr/:from-:to/sample/:samplesize/probabilistic', function(req, res, next) {
  var start = new Date();
@@ -304,7 +330,6 @@ router.get('/home', function(req, res, next) {
       reponse = resp.hits.hits;
 
       var jsonsource= [];
-      console.log(reponse);
       var encab = [];
       if(reponse[0]){
         for(key in reponse[0]['_source']){
