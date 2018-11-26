@@ -437,13 +437,33 @@ function navio(selection, _h) {
       var filteredData;
 
       console.log('Tadava URL', nv.tadavaURL);
+
       if(nv.tadavaURL && nv.tindex){
         //Make request to URL and save in filtered data, add to dataIs.
+
         //TODO: Hacerlo anidada!!!
+        const Http = new XMLHttpRequest();
+
+        var tadavaprequest = nv.tadavaURL+'/post/'+nv.tindex;
+        console.log('Tadava Post Request', tadavaprequest);
+        Http.open("POST", tadavaprequest, true);
+
+        var jsonFilter = {
+          filters: filters
+        }
+        console.log("JSONfilters", jsonFilter);
+
+        Http.setRequestHeader("Content-Type", "application/json");
+        Http.onreadystatechange=(e)=>{
+          //Check reponse
+          console.log('Post response', Http.responseText);
+        }
+        Http.send(JSON.stringify(jsonFilter));
+
+        /**
         var trequest = nv.tadavaURL+'/'+nv.tindex+'/'+filterElem.params.attr+'/'+filterElem.params.value+'/sample/10000/probabilistic';
         console.log('Tadava Request', trequest);
 
-        const Http = new XMLHttpRequest();
         Http.open("GET", trequest);
         Http.send();
         Http.onreadystatechange=(e)=>{
@@ -470,7 +490,7 @@ function navio(selection, _h) {
             newData.length-1
           );
 
-        }
+        }**/
 
       }
       /*
@@ -513,7 +533,6 @@ function navio(selection, _h) {
     svg.select(".tooltip")
       .attr("transform", "translate(" + (screenX) + "," + (screenY+20) + ")")
       .call(function (tool) {
-        console.log('Item ID', itemId);
         tool.select(".tool_id")
           .text(itemId);
         tool.select(".tool_value_name")
