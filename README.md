@@ -15,4 +15,4 @@ To use Tadava you will have to:
 3. Go to folder TadavaMiddleware and start the server:
 ````
 execute node app
-´´´´
+````
