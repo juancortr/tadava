@@ -115,8 +115,8 @@ router.post('/post/:index', function(req, res, next){
         //if(el.)
         //Set each condition and add to 
       }
-      var qbody;
-/**
+      //var qbody;
+
   //Random sampling
   var qbody = '{"size":'+samplesize+', "query":{"range":{"'+attrib+'":{"gte":'+limInf+', "lte":'+limSup+'}}}}';
 
@@ -131,7 +131,7 @@ router.post('/post/:index', function(req, res, next){
   }, function (err) {
       console.trace(err.message);
   });
-  //res.render('index', { title: 'Express' });*/
+  //res.render('index', { title: 'Express' });
 });
 
 //Rounting de selección en rango númerico de atributo por sampling
