@@ -444,7 +444,7 @@ function navio(selection, _h) {
         //TODO: Hacerlo anidada!!!
         const Http = new XMLHttpRequest();
 
-        /**
+        
         var tadavaprequest = nv.tadavaURL+'/post/'+nv.tindex;
         console.log('Tadava Post Request', tadavaprequest);
         Http.open("POST", tadavaprequest, true);
@@ -457,11 +457,33 @@ function navio(selection, _h) {
         Http.setRequestHeader("Content-Type", "application/json");
         Http.onreadystatechange=(e)=>{
           //Check reponse
-          console.log('Post response', Http.responseText);
+          var newSampledFiltered = JSON.parse(Http.responseText).hits.hits;
+          console.log(newSampledFiltered);
+
+          var sourceSampledFiltered = [];
+          newSampledFiltered.forEach(function(d, i){
+            var elem = d._source;
+            elem.i = i; 
+            sourceSampledFiltered.push(elem);
+          });
+
+          after = performance.now();
+          console.log("Click filtering " + (after-before) + "ms");
+
+          var newData = dataIs;
+          //var newData = dataIs.slice(0, dataIs.length-1);
+          newData.push(sourceSampledFiltered);
+
+          console.log("New Data", newData);
+          nv.updateData(
+            newData,
+            colScales,
+            newData.length-1
+          );
         }
         Http.send(JSON.stringify(jsonFilter));
-        */
         
+        /**
         var trequest = nv.tadavaURL+'/'+nv.tindex+'/'+filterElem.params.attr+'/'+filterElem.params.value+'/sample/10000/probabilistic';
         console.log('Tadava Request', trequest);
 
@@ -491,7 +513,7 @@ function navio(selection, _h) {
             newData.length-1
           );
 
-        }
+        }*/
 
       }
       /*

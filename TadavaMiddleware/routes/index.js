@@ -106,17 +106,59 @@ router.post('/post/:index', function(req, res, next){
 
       //Extract json of filters
       var iterableFilters = req.body.filters;
-      console.log(iterableFilters);
+      //console.log(iterableFilters);
 
       var filtersAcum="";
-      for( el in iterableFilters){
-        console.log(el);
-        //Check if
-        //if(el.)
-        //Set each condition and add to 
-      }
-      //var qbody;
 
+      var funcArray = [];
+      var funcString = "";
+      for( var el in iterableFilters){
+        var fobj = iterableFilters[el];
+        //Set each condition and add to 
+        //Check if
+        //{ type: 'click', params: { attr: 'posts', value: '950' } }
+        if(fobj.type == 'click'){
+
+          var attrib = fobj.params.attr;
+          var valor = fobj.params.value;
+
+          var func = '{"term":{"'+attrib+'":"'+valor.toLowerCase()+'"}}' ; 
+          if(el == 0){
+            funcString = func;
+          }
+          else{
+          funcString += ","+func;   
+          }
+        }
+        //TODO para un drag!!! range query
+
+        funcArray.push(func);
+
+      }
+      var probabilisticq = '{"script_score":{"script": "if (_score.doubleValue()> 1/'+samplesize+'){return 1;} else {return 0;}"}}';
+      //funcArray.push(probabilisticq);
+
+      console.log(funcString);
+      //var qbody = '{"size":'+samplesize+', query: { "match_all": {}}, "function_score": {"query": { },"functions":'+funcArray+',"boost_mode":"replace"}}';
+      var qbody = '{"size":'+samplesize+',  "query":{ "function_score": {"query": {"bool" : { "filter":['+funcArray+']}},"boost_mode":"replace","functions":['+probabilisticq+']}}}';
+
+      //var qbody = '{"size":'+samplesize+', query: {  "function_score": {"query": {['+funcString+']},"functions":[{"script_score":{"script": "if (_score.doubleValue()> 1/'+samplesize+'){return 1;} else {return 0;}"}}],"boost_mode":"replace"}}}';
+      console.log(qbody);
+
+      client.search({
+        index: indice,
+        body: qbody
+      }).then(function (resp) {
+        var end = new Date() - start;
+        console.log("Execution Time: "+end + " ms.");
+          reponse = resp.hits.hits;
+          res.send(resp);
+      }, function (err) {
+          console.trace(err.message);
+      });
+      //res.render('index', { title: 'Express' });
+
+      /**
   //Random sampling
   var qbody = '{"size":'+samplesize+', "query":{"range":{"'+attrib+'":{"gte":'+limInf+', "lte":'+limSup+'}}}}';
 
@@ -132,6 +174,7 @@ router.post('/post/:index', function(req, res, next){
       console.trace(err.message);
   });
   //res.render('index', { title: 'Express' });
+  */
 });
 
 //Rounting de selección en rango númerico de atributo por sampling
