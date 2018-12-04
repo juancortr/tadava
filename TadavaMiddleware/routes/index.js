@@ -122,25 +122,37 @@ router.post('/post/:index', function(req, res, next){
           var attrib = fobj.params.attr;
           var valor = fobj.params.value;
 
-          var func = '{"term":{"'+attrib+'":"'+valor.toLowerCase()+'"}}' ; 
-          if(el == 0){
+          var func = '{"term":{"'+attrib+'":"'+valor+'"}}' ; 
+          //var func = '{"term":{"'+attrib+'":"'+valor+'"}}' ; 
+          if(funcString == ""){
             funcString = func;
           }
           else{
           funcString += ","+func;   
           }
         }
-        //TODO para un drag!!! range query
+        else if(fobj.type == 'range'){
 
+          var attrib = fobj.params.attr;
+          var minvalor = fobj.params.minValue;
+          var maxvalor = fobj.params.maxValue;
+
+          var func = '{"range":{"'+attrib+'": { "gte": "'+minvalor+'", "lte" :"'+maxvalor+'"} }}' ; 
+          if(funcString == ""){
+            funcString = func;
+          }
+          else{
+          funcString += ","+func;   
+          }
+        }
         funcArray.push(func);
 
       }
-      var probabilisticq = '{"script_score":{"script": "if (_score.doubleValue()> 1/'+samplesize+'){return 1;} else {return 0;}"}}';
-      //funcArray.push(probabilisticq);
+      //var probabilisticq = '{"script_score":{"script": "if (_score.doubleValue()> 1/'+samplesize+'){return 1;} else {return 0;}"}}';
+      var probabilisticq = '{"random_score":{}}'
 
       console.log(funcString);
-      //var qbody = '{"size":'+samplesize+', query: { "match_all": {}}, "function_score": {"query": { },"functions":'+funcArray+',"boost_mode":"replace"}}';
-      var qbody = '{"size":'+samplesize+',  "query":{ "function_score": {"query": {"bool" : { "filter":['+funcArray+']}},"boost_mode":"replace","functions":['+probabilisticq+']}}}';
+      var qbody = '{"size":'+samplesize+',"sort":"_score",  "query":{ "function_score": {"query": {"bool" : { "filter":['+funcArray+']}},"boost_mode":"replace","functions":['+probabilisticq+']}}}';
 
       //var qbody = '{"size":'+samplesize+', query: {  "function_score": {"query": {['+funcString+']},"functions":[{"script_score":{"script": "if (_score.doubleValue()> 1/'+samplesize+'){return 1;} else {return 0;}"}}],"boost_mode":"replace"}}}';
       console.log(qbody);
@@ -150,7 +162,19 @@ router.post('/post/:index', function(req, res, next){
         body: qbody
       }).then(function (resp) {
         var end = new Date() - start;
+
+
         console.log("Execution Time: "+end + " ms.");
+          /*
+          client.count({
+            index: indice,
+            body: qbody        
+          }).then(function (respo) {
+            console.log("Document count: "+respo.count);
+          }, function (err) {
+              console.trace(err.message);
+          });*/
+          //console.log("Document count: "+resp.hits.total);
           reponse = resp.hits.hits;
           res.send(resp);
       }, function (err) {
@@ -316,10 +340,12 @@ router.get('/:index/sample/:samplesize', function(req, res, next) {
 });
 
 //Sampling
-router.get('/home', function(req, res, next) {
+//router.get('/home/:index', function(req, res, next) {
+  router.get('/:index', function(req, res, next) {
+  var indice = req.params.index;
   //Random sampling
   client.search({
-    index: 'sample_10000000_module',
+    index: indice,
     body: {
       size:10000,
       query: {
@@ -337,6 +363,7 @@ router.get('/home', function(req, res, next) {
     }
   }).then(function (resp) {
       reponse = resp.hits.hits;
+      var nelems = resp.hits.total;
 
       var jsonsource= [];
       var encab = [];
@@ -381,7 +408,7 @@ router.get('/home', function(req, res, next) {
       //res.render("index", {datos:content});
 
       //Envio de respuesta en json
-      res.render("index", {datos:jsonsource});
+      res.render("index", {datos:jsonsource, telems:nelems});
       //console.log(res);
       //res.send(content);
       //res.sendFile("index.html", {datos :content,"root":"public"});

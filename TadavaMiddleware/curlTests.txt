@@ -1,0 +1,60 @@
+curl -XPOST '157.253.236.37:8083/resultados_senado_2018/_search?=pretty' -d  '
+{
+    "size": 10000,
+    "sort" : "_score",
+    "query": {
+      "function_score": {
+        "query": {
+          "bool": {
+            "filter": [
+              {
+                "term": {
+                  "NMpio": "MEDELLIN"
+                }
+              },
+              {
+                "range": {
+                  "votos":{
+                    "gte": "3",
+                    "lte": "4"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "partido": "PARTIDO LIBERAL COLOMBIANO"
+                }              
+              }
+            ]
+          }
+        },
+        "boost_mode": "replace",
+        "functions": [
+          {"random_score":{}}
+        ]
+      }
+    }
+  }
+'
+
+,
+          {
+            "script_score": {
+              "script": "if (_score.doubleValue()> 1/10){return 1;} else {return 0;}"
+            }
+          }
+
+curl -X GET "157.253.236.37:8083/sample_10000000_module/_analyze" -H 'Content-Type: application/json' -d'
+{
+  "field": "NCircunscripcion",
+  "text": "BOGOTA D.C."
+}
+'
+
+{"tokens":
+  [
+    {"token":"partido","start_offset":0,"end_offset":7,"type":"<ALPHANUM>","position":0},
+    {"token":"liberal","start_offset":8,"end_offset":15,"type":"<ALPHANUM>","position":1},
+    {"token":"colombiano","start_offset":16,"end_offset":26,"type":"<ALPHANUM>","position":2}
+  ]
+}

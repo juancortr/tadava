@@ -1,6 +1,6 @@
 html 
 head
-	script(src='https://d3js.org/d3.v4.min.js')
+	script(src='https://d3js.org/d3.v5.min.js')
 	script(src='https://d3js.org/d3-color.v1.min.js')
 	script(src='https://d3js.org/d3-interpolate.v1.min.js')
 	script(src='https://d3js.org/d3-scale-chromatic.v1.min.js')
@@ -10,5 +10,6 @@ body
 	#navio 
 	script(type='text/javascript').
 		var dats = !{JSON.stringify(datos)};
+		var numtelems = !{telems};
 	script(src='javascripts/navio_set.js')
 

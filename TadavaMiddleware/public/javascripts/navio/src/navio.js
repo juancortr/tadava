@@ -2,9 +2,7 @@
 function navio(selection, _h) {
   "use strict";
   var nv = this || {},
-    data = [], //Contains the original data attributes
-    dataIs = [], //Contains only the indices to the data, is an array of arrays, one for each level
-    dataLs = [], //Contains tadava samples of the data, is an array of arrays, one for each level
+    dataIs = [], //Contains the data, is an array of arrays, one for each level
     dData = d3.map(), // A hash for the data
     dDimensions = d3.map(),
     dimensionsOrder = [],
@@ -27,9 +25,11 @@ function navio(selection, _h) {
     x0=0,
     y0=100,
     id = "__seqId",
-    updateCallback = function () {},
+    //updateCallback = function () {},
     tadavaCB = function(){},
     filters = [],
+    totalElemsTadava,   //Receives the total number of docs in ES cluster
+    totalDocs = [], //Array to store total number of documents for filter made
     tadavaURL,
     tindex;
 
@@ -187,13 +187,22 @@ function navio(selection, _h) {
     console.log("click ");
     console.log(d);
     var before = performance.now();
-    dataIs[d.level] = dataIs[d.level].sort(function (a, b) {
-      return d3.ascending(data[a.i][d.attrib], data[b.i][d.attrib]);
+
+    console.log("Sorting by "+d.attrib);
+
+    //dataIs[d.level] = dataIs[d.level].sort((a, b) => d3.ascending(a[d.attrib], b[d.attrib]));
+    dataIs[d.level] = dataIs[d.level].sort(function(a, b) {
+       return d3.ascending(parseInt(a[d.attrib]), parseInt(b[d.attrib])) ||
+         d3.ascending(a[d.attrib], b[d.attrib]);
     });
-    dataIs[d.level].forEach(function (row,i) { data[row.i].__i[d.level] = i; });
+    
+    /*dataIs[d.level] = dataIs[d.level].sort(function (a, b) {
+      return d3.ascending(dataIs[d.level][a.i][d.attrib], dataIs[d.level][b.i][d.attrib]);
+      //return d3.ascending(a[d.attrib], b[d.attrib]);
+    });*/
     var after = performance.now();
     console.log("Click sorting " + (after-before) + "ms");
-    dSortBy.set(d.level, d.attrib);
+    //dSortBy.set(d.level, d.attrib);
     nv.updateData(dataIs, colScales, d.level);
   }
 
@@ -213,6 +222,8 @@ function navio(selection, _h) {
     for (i = 0; i < dimensionsOrder.length; i++) {
       attrib = dimensionsOrder[i];
       y = Math.round(yScales[level](item[id]) + yScales[level].bandwidth()/2);
+
+      //y = Math.round(yScales[level](item.i) + yScales[level].bandwidth()/2);
       // y = yScales[level](item[id]) + yScales[level].bandwidth()/2;
 
       context.beginPath();
@@ -257,7 +268,6 @@ function navio(selection, _h) {
     context.stroke();
   }
 
-
   function removeBrushOnLevel(lev) {
     d3.select("#level"+lev)
       .selectAll(".brush")
@@ -284,7 +294,8 @@ function navio(selection, _h) {
     var _brush = d3.select(this)
       .selectAll(".brush")
       .data([{
-        data : data[d],
+        data : dataIs[d],
+        //data : data[d],
         level : i
       }]);// fake data
 
@@ -317,17 +328,17 @@ function navio(selection, _h) {
       var before = performance.now();
       var brushed = d3.event.selection;
 
-      var
-        // first = dData.get(invertOrdinalScale(yScales[i], brushed[0] -yScales[i].bandwidth())),
-        first = dData.get(invertOrdinalScale(yScales[i], brushed[0])),
-        // last = dData.get(invertOrdinalScale(yScales[i], brushed[1] -yScales[i].bandwidth()))
-        last = dData.get(invertOrdinalScale(yScales[i], brushed[1]));
+      //console.log("Level scale I: "+i);
+      //InvertScale give the id of the item
+      console.log("InvertScale: "+invertOrdinalScale(yScales[i], brushed[0]));
+      console.log("Brushed: "+brushed[0]);
 
-        //TODO how to get min and max at attr
-        //TODO how to get attr
-        //Get Attr as in click
-        //Find value of first
-        //find value of last
+      //var first = dData.get(invertOrdinalScale(yScales[i], brushed[0]));
+      //var last = dData.get(invertOrdinalScale(yScales[i], brushed[1]));
+
+      var first = dataIs[i][invertOrdinalScale(yScales[i], brushed[0])];
+      var last = dataIs[i][invertOrdinalScale(yScales[i], brushed[1])];
+
       var screenX = d3.event.sourceEvent.offsetX;
 
       var itemAttr = invertOrdinalScale(xScale, screenX - levelScale(i));
@@ -345,54 +356,55 @@ function navio(selection, _h) {
 
       console.log("Filter Element", filterElem);
 
+      if(nv.tadavaURL && nv.tindex){
+        //Make request to URL and save in filtered data, add to dataIs.
+
+        const Http = new XMLHttpRequest();
+        
+        var tadavaprequest = nv.tadavaURL+'/post/'+nv.tindex;
+        console.log('Tadava Post Request', tadavaprequest);
+        Http.open("POST", tadavaprequest, true);
+
+        var jsonFilter = {
+          filters: filters
+        }
+        console.log("JSONfilters", jsonFilter);
+        Http.setRequestHeader("Content-Type", "application/json");
+        Http.onreadystatechange=(e)=>{
+          //Check reponse
+          var newSampledFiltered = JSON.parse(Http.responseText).hits.hits;
+          totalDocs.push(JSON.parse(Http.responseText).hits.total);
+
+          var sourceSampledFiltered = [];
+          newSampledFiltered.forEach(function(d, i){
+            //Extract source
+            var elem = d._source;
+            elem.i = i; 
+            sourceSampledFiltered.push(elem);
+          });
+
+          after = performance.now();
+          console.log("Click filtering " + (after-before) + "ms");
+
+          var newData = dataIs;
+          //var newData = dataIs.slice(0, dataIs.length-1);
+          newData.push(sourceSampledFiltered);
+
+          nv.updateData(
+            newData,
+            colScales,
+            newData.length-1
+          );
+        }
+        Http.send(JSON.stringify(jsonFilter));
+      }
+
       console.log("first and last");
       console.log(first);
       console.log(last);
-      console.log("first id "+ first.__i[i]+ " last id " + last.__i[i] );
-      // var brush0_minus_bandwidth = brushed[0] - yScales[i].bandwidth();
-      // var filteredData = data[i].filter(function (d) {
-      //   var y = yScales[i](d[id]);
-      //   d.visible = y >= (brush0_minus_bandwidth) && y <= (brushed[1] );
-      //   return d.visible;
-      // });
-
-      var filteredData = dataIs[i].filter(function (d) {
-        data[d].visible = data[d].__i[i] >= first.__i[i] && data[d].__i[i] <= last.__i[i];
-        return data[d].visible;
-      });
-
-      //Assign the index
-      for (var j = 0; j < filteredData.length; j++) {
-        data[filteredData[j]].__i[i+1] = j;
-        console.log(data[filteredData[j]]);
-      }
 
       var after = performance.now();
       console.log("Brushend filtering " + (after-before) + "ms");
-
-
-      console.log("Computing new data");
-      var newData = dataIs;
-      if (filteredData.length===0) {
-        console.log("Empty selection!");
-        return;
-      } else {
-        newData = dataIs.slice(0,i+1);
-        newData.push(filteredData);
-      }
-
-
-      nv.updateData(
-        newData,
-        colScales
-      );
-      console.log("out of updateData");
-      console.log("Selected " + filteredData.length + " calling updateCallback");
-      updateCallback(nv.getVisible());
-
-      // nv.update(false); //don"t update brushes
-
-      // d3.select(this).transition().call(d3.event.target.move, d1.map(x));
     }// brushend
 
     function onSelectByValue() {
@@ -433,7 +445,6 @@ function navio(selection, _h) {
 
       before = performance.now();
 
-      //TODO execute sampling query with filter and add reponse to next level
       var filteredData;
 
       console.log('Tadava URL', nv.tadavaURL);
@@ -441,9 +452,7 @@ function navio(selection, _h) {
       if(nv.tadavaURL && nv.tindex){
         //Make request to URL and save in filtered data, add to dataIs.
 
-        //TODO: Hacerlo anidada!!!
         const Http = new XMLHttpRequest();
-
         
         var tadavaprequest = nv.tadavaURL+'/post/'+nv.tindex;
         console.log('Tadava Post Request', tadavaprequest);
@@ -458,7 +467,8 @@ function navio(selection, _h) {
         Http.onreadystatechange=(e)=>{
           //Check reponse
           var newSampledFiltered = JSON.parse(Http.responseText).hits.hits;
-          console.log(newSampledFiltered);
+          console.log("#Documentos", JSON.parse(Http.responseText).hits.total);
+          totalDocs.push(JSON.parse(Http.responseText).hits.total);
 
           var sourceSampledFiltered = [];
           newSampledFiltered.forEach(function(d, i){
@@ -474,7 +484,6 @@ function navio(selection, _h) {
           //var newData = dataIs.slice(0, dataIs.length-1);
           newData.push(sourceSampledFiltered);
 
-          console.log("New Data", newData);
           nv.updateData(
             newData,
             colScales,
@@ -482,59 +491,7 @@ function navio(selection, _h) {
           );
         }
         Http.send(JSON.stringify(jsonFilter));
-        
-        /**
-        var trequest = nv.tadavaURL+'/'+nv.tindex+'/'+filterElem.params.attr+'/'+filterElem.params.value+'/sample/10000/probabilistic';
-        console.log('Tadava Request', trequest);
-
-        Http.open("GET", trequest);
-        Http.send();
-        Http.onreadystatechange=(e)=>{
-          var newSampledFiltered = JSON.parse(Http.responseText).hits.hits;
-          console.log(newSampledFiltered);
-
-          var sourceSampledFiltered = [];
-          newSampledFiltered.forEach(function(d, i){
-            var elem = d._source;
-            elem.i = i; 
-            sourceSampledFiltered.push(elem);
-          });
-          after = performance.now();
-          console.log("Click filtering " + (after-before) + "ms");
-
-          var newData = dataIs;
-          //var newData = dataIs.slice(0, dataIs.length-1);
-          newData.push(sourceSampledFiltered);
-
-          console.log(newData);
-          nv.updateData(
-            newData,
-            colScales,
-            newData.length-1
-          );
-
-        }*/
-
       }
-      /*
-      var filteredData = dataIs[i].filter(function (i) {
-        data[i].visible = dataIs[i][itemAttr] === sel[itemAttr];
-        return data[i].visible;
-      });
-      //Filtered data contains filtered indices as it comes from dataIs
-      filteredData.forEach(function (d, itemI) { data[d].__i[i+1] = itemI;});
-      
-      
-      var newData = dataIs.slice(0,i+1);
-      newData.push(filteredData);
-
-      nv.updateData(
-        newData,
-        colScales
-      );
-      */
-      //console.log("Selected " + nv.getVisible().length + " calling updateCallback");
-      //updateCallback(nv.getVisible());
     }
   }
 
@@ -554,7 +511,8 @@ function navio(selection, _h) {
     // });
 
     svg.select(".tooltip")
-      .attr("transform", "translate(" + (screenX) + "," + (screenY+20) + ")")
+      //.attr("transform", "translate(" + (screenX) + "," + (screenY+20) + ")")
+      .attr("transform", "translate(" + (screenX) + "," + (screenY) + ")")
       .call(function (tool) {
         tool.select(".tool_id")
           .text(itemId);
@@ -695,6 +653,7 @@ function navio(selection, _h) {
       .append("text")
       .attr("class", "numNodesLabel")
       .style("font-family", "sans-serif")
+      .style("font-size", "11px")
       .style("pointer-events", "none")
       .merge(levelOverlay.select(".numNodesLabel"))
       .attr("y", function (_, i) {
@@ -703,8 +662,8 @@ function navio(selection, _h) {
       .attr("x", function (_, i) {
         return  levelScale(i);
       })
-      .text(function (d) {
-        return fmt(d.length);
+      .text(function (d, i) {
+        return "Showing "+fmt(d.length)+" of "+fmt(totalDocs[i])+" elements";
       });
 
 
@@ -796,6 +755,7 @@ function navio(selection, _h) {
     }
     dataIs[level].representatives.forEach(function (item) {
       // Compute the yPrev by calculating the index of the corresponding representative
+
       var iOnPrev = dData.get(data[item][id]).__i[level-1];
       var iRep = Math.floor(iOnPrev - iOnPrev%dataIs[level-1].itemsPerpixel);
       // console.log("i rep = "+ iRep);
@@ -834,15 +794,19 @@ function navio(selection, _h) {
     colScales.keys().forEach(function (d) {
       dDimensions.set(d, true);
     });
-    dData = d3.map();
-    for (var i = 0; i < data.length ; i++) {
-      var d = data[i];
+    //dData = d3.map();
+    //for (var i = 0; i < data.length ; i++) {
+    
+    /*for (var i = 0; i < dataIs.length ; i++) {
+      //var d = data[i];
+      var d = dataIs[i];
       d.__seqId = i; //create a default id with the sequential number
       dData.set(d[id], d);
       d.__i={};
       d.__i[0] = i;
 
-    }
+    }*/
+    //Add
     // nv.updateData(mData, mColScales, mSortByAttr);
 
     var after = performance.now();
@@ -871,16 +835,21 @@ function navio(selection, _h) {
     var representatives = [];
     console.log('Level to update', levelToUpdate);
     if (dataIs[levelToUpdate].length>height) {
+      console.log("Height", height);
       var itemsPerpixel = Math.max(Math.floor(dataIs[levelToUpdate].length / (height*2)), 1);
       console.log("itemsPerpixel", itemsPerpixel);
       dataIs[levelToUpdate].itemsPerpixel = itemsPerpixel;
       for (var j = 0; j< dataIs[levelToUpdate].length; j+=itemsPerpixel ) {
+        dataIs[levelToUpdate][j].i = j;
         representatives.push(dataIs[levelToUpdate][j]);
       }
     } else {
       dataIs[levelToUpdate].itemsPerpixel=1;
       //representatives = dataIs[levelToUpdate];
-      representatives = dataIs[levelToUpdate].forEach(function(d,i){return i;});
+      dataIs[levelToUpdate].forEach(function(d,i){
+        d.i = i;
+        representatives.push(d);
+      });      
     }
     dataIs[levelToUpdate].representatives = representatives;
     //yScales[levelToUpdate].domain(representatives.map(function (rep) { return data[rep.i][id];}));
@@ -909,11 +878,11 @@ function navio(selection, _h) {
     // colScales = d3.map();
     dDimensions.keys().forEach(
       function (attrib) {
-        if (attrib === "visible" || attrib === "id" ) return; //TODO: check why id
+        if (attrib === "visible" || attrib === "id" ) return;
         var scale = colScales.get(attrib);
         scale.domain(d3.extent(dataIs[0].representatives.map(function (rep) {
-          return data[rep.i][attrib];
-        }))); //TODO: make it compute it based on the local range
+          return dataIs[0][rep.i][attrib];
+        }))); 
         colScales.set(attrib, scale);
       }
     );
@@ -960,7 +929,7 @@ function navio(selection, _h) {
     // }
     colScales = mColScales !== undefined ? mColScales: colScales;
     dataIs = mDataIs;
-    console.log("New Data",dataIs);
+    //console.log("New Data",dataIs);
     console.log("Level to Update",levelToUpdate);
 
     updateScales(levelToUpdate);
@@ -990,15 +959,16 @@ function navio(selection, _h) {
     //removeBrushOnLevel(dataLs.length-2);
     removeBrushOnLevel(dataIs.length-2);
     //dataLs[dataLs.length-2].forEach(function (d) { data[d].visible=true; });
-    dataIs[dataIs.length-2].forEach(function (d) { data[d].visible=true; });
+    //dataIs[dataIs.length-2].forEach(function (d) { data[d].visible=true; });
 
     //dataLs = dataLs.slice(0, dataLs.length-1);
     //nv.updateData(dataLs, colScales);
     dataIs = dataIs.slice(0, dataIs.length-1);
     nv.updateData(dataIs, colScales);
-    updateCallback(nv.getVisible());
+    //updateCallback(nv.getVisible());
 
     filters.pop();
+    totalDocs.pop();
     console.log("Filter removed from stack");
   }
 
@@ -1018,14 +988,15 @@ function navio(selection, _h) {
     var w = levelScale.range()[1] + nv.margin + x0;
     context.clearRect(0,0,w+1,height+1);
     dataIs.forEach(function (levelData, i) {
-      // var itemsPerpixel = Math.floor(levelData.length/height);
+      //var itemsPerpixel = Math.floor(levelData.length/height);
       // if (itemsPerpixel>1) { //draw one per pixel
       //   for (var j = 0; j< levelData.length; j+=(itemsPerpixel-1)) {
       //     drawItem(levelData[j], i);
       //   }
       // } else { // draw all
       levelData.representatives.forEach(function (rep) {
-        drawItem(data[rep.i], i);
+        drawItem(dataIs[i][rep.i], i);
+        //drawItem(rep, i);
       });
       // }
 
@@ -1120,7 +1091,7 @@ function navio(selection, _h) {
     }
   }
   nv.data = function(_) {
-    if (!colScales.has("visible")) {
+    /*if (!colScales.has("visible")) {
       nv.addAttrib("visible",
         d3.scaleOrdinal()
           .domain([false,true])
@@ -1128,13 +1099,14 @@ function navio(selection, _h) {
           //, "#cddca3", "#8c6d31", "#bd9e39"]
       );
       moveAttrToPos("visible", 0);
-    }
+    }*/
+    /*
     if (!colScales.has("__seqId")) {
       nv.addSequentialAttrib(
         "__seqId"
       );
       moveAttrToPos("__seqId", 1);
-    }
+    }*/
 
 
     // nv.addCategoricalAttrib("group");
@@ -1149,8 +1121,8 @@ function navio(selection, _h) {
       //dataIs = data;
       dataIs = [data.map(function (_, i) { return _; })];
       //dataIs = [data.map(function (_, i) { return i; })];
-
-
+      //TODO Cambiar a despues init
+      totalDocs.push(nv.totalElemsTadava);
       nv.initData(
         dataIs,
         colScales
