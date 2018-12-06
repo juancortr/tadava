@@ -11,8 +11,21 @@ The folder ./DataSampling contains the scripts for big datasets generation using
 
 To use Tadava you will have to:
 1. Load your data to Elasticsearch using the script and instructions provided [here](https://github.com/john-guerra/elasticSearchExperiments/blob/master/DataSampling/indicemapping.md), where the index and mapping requirements to load data into the cluster.
-2. Set Tadava's URL endpoint and relevant columns to visualize in Navio in the file TadavaMiddleware/public/javascripts/navio_set.js
-3. Go to folder TadavaMiddleware and start the server:
+2. Set Tadava's URL endpoint, index name and relevant columns to visualize in Navio in the file TadavaMiddleware/public/javascripts/navio_set.js
 ````
-execute node app
+
+  nn.tadavaURL = 'elasticsearch_cluster_url_endpoint';
+  nn.tindex = 'index_name';
+
+  var catColumns = [
+    "categoric_columns"
+  ];
+  var seqColumns = [
+    "sequential_columns"
+  ];
+````
+
+3. Go to folder TadavaMiddleware and start the server by running:
+````
+node app
 ```

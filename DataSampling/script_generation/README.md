@@ -18,7 +18,7 @@ Our ElasticSearch index is located in the URL caoba-access.virtual.uniandes.edu.
 
 The command used to create the index and the mappings for the dataset attributes is:
 ´´´
-curl -XPOST caoba-access.virtual.uniandes.edu.co:8083/sample_XXXX -d '{
+curl -XPOST hostURL:port/sample_XXXX -d '{
     "settings" : {
         "number_of_shards" : 1
     },
@@ -44,7 +44,7 @@ curl -XPOST caoba-access.virtual.uniandes.edu.co:8083/sample_XXXX -d '{
 The command used to upload the data to its corresponding elasticsearch index is:
 
 ´´´
-elasticsearch_loader --es-host http://caoba-access.virtual.uniandes.edu.co:8083 --index sample_XXXXX --type basicdata csv /Users/JCAMILORT/Developer/esexploration/elasticSearchExperiments/enapp/data/scrip_generator/sample_XXXXX.txt
+elasticsearch_loader --es-host hostURL:port --index sample_XXXXX --type basicdata csv path_to_local_file
 ´´´
 
 ### Test execution
