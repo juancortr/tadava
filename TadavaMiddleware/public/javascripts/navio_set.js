@@ -38,8 +38,6 @@ var catColumns = [
   var data = dats;
   var i =0;
 
-  nn.totalElemsTadava = numtelems;
-
   data.forEach((d,i) => {  d.i = i; /*console.log(d);*/});
   nn.data(data);
 
