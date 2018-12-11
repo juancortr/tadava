@@ -9,12 +9,10 @@ import codecs
 #Samples para el analisis de arquitectura de 1, 3 y 5 nodos
 samples = [1]
 
-#ruta = "/Users/juancortr/Documents/Uniandes/MINE/Tesis/elasticSearchExperiments/enapp/data/scrip_generator/sample_"
 #Elasticsearch cluster URL
-esurl = "157.253.236.37:8083"
+esurl = "your_escluster_url"
 
 # Resultados senado
-#ruta = "/Users/juancortr/Documents/Uniandes/MINE/Tesis/VAArch_repo⁩/DataSampling⁩/data/RESULTADOS_ELECTORALES_2018_SENADO_DE_LA_REPUBLICA.csv"
 ruta = "..⁩/data/RESULTADOS_ELECTORALES_2018_SENADO_DE_LA_REPUBLICA.csv"
 indiceV = "resultados_senado_2018"
 mappingFuente = "'{\"settings\" : {\"number_of_shards\" : 1 },\"mappings\" : {\"basicdata\" : {\"properties\" : {\"NCircunscripcion\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"NDepto\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"NMpio\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\"},\"ZZ\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"PP\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\"},\"Npuesto\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"mesa\" : {\"type\":\"long\" },\"partido\" : { \"type\" : \"string\" , \"index\" : \"not_analyzed\"},\"candidato\" : { \"type\" : \"string\", \"index\" : \"not_analyzed\" },\"votos\" : { \"type\" : \"long\" }}}}}'"

@@ -29,7 +29,7 @@ except:
     print("Try: pip install elasticsearch")
     sys.exit(1)
 
-es = Elasticsearch(['http://caoba-access.virtual.uniandes.edu.co:8083/'], timeout=60) 
+es = Elasticsearch(['your_escluster_url'], timeout=60) 
 
 samplesize = 10000
 
