@@ -663,7 +663,8 @@ function navio(selection, _h) {
         return  levelScale(i);
       })
       .text(function (d, i) {
-        return "Showing "+fmt(d.length)+" of "+fmt(totalDocs[i])+" elements";
+        //return "Showing "+fmt(d.length)+" \n of "+fmt(totalDocs[i])+" elements";
+        return "Showing "+fmt(d.length)+" of "+fmt(totalDocs[i]);
       });
 
 

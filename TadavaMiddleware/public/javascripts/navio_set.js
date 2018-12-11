@@ -13,8 +13,7 @@ var catColumns = [
     "votos"
   ];
 
-/**
-  var catColumns = [
+/**  var catColumns = [
     "id",
     "first_name",
     "last_name",
@@ -27,6 +26,20 @@ var catColumns = [
     "date"
   ];
 */
+
+/**
+  var catColumns = [
+    "CLASE_PREDIO",
+    "AVALUO_ANO",
+    "NOMBRE_BARRIO",
+    "DESCRIPCION_DESTINO",
+    "TIPO_PROPIEDAD"
+  ];
+  var seqColumns = [
+    "AREA_CONSTRUIDA",
+  ];
+*/
+
   var nn = new navio("#navio", 600).id("i");
 
   catColumns.forEach((c) => nn.addCategoricalAttrib(c));
@@ -45,7 +58,9 @@ var catColumns = [
   var ldata = {};
   nn.dataFilterSample(ldata);
   nn.tadavaURL = 'http://localhost:8090';
+
   //nn.tindex = 'sample_10000000_module';
+  //nn.tindex = 'predios_bogota';
   nn.tindex = 'resultados_senado_2018';
 
   //26/01/2016 04:21:05 a.m.
